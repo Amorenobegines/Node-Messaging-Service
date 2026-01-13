@@ -4,7 +4,12 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
-} from 'typeorm';
+    DeleteDateColumn,
+    OneToMany
+} from "typeorm";
+
+import { Message } from "../../messages/entities/Message";
+
 
 @Entity('users')
 export class User {
@@ -28,4 +33,15 @@ export class User {
 
     @UpdateDateColumn()
     updatedAt!: Date;
+
+    @DeleteDateColumn() // Puedes recuperar registros eliminados si quieres.
+    deletedAt!: Date;
+
+    @OneToMany(() => Message, message => message.sender)
+    sentMessages!: Message[];
+
+    @OneToMany(() => Message, message => message.receiver)
+    receivedMessages!: Message[];
+
+
 }

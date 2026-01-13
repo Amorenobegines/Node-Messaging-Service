@@ -3,27 +3,36 @@ import {
     PrimaryGeneratedColumn,
     Column,
     ManyToOne,
-    CreateDateColumn,
-} from 'typeorm';
+    CreateDateColumn
+} from "typeorm";
+import { User } from "../../users/entities/User";
 
-import { User } from '../../users/entities/User';
-
-@Entity('messages')
+@Entity()
 export class Message {
-    @PrimaryGeneratedColumn('uuid')
+
+    @PrimaryGeneratedColumn("uuid")
     id!: string;
 
-    @Column()
+    // Usuario que envía el mensaje
+    @ManyToOne(() => User, user => user.sentMessages, { onDelete: "CASCADE" })
+    sender!: User;
+
+    @Column("uuid")
+    senderId!: string;
+
+    // Usuario que recibe el mensaje
+    @ManyToOne(() => User, user => user.receivedMessages, { onDelete: "CASCADE" })
+    receiver!: User;
+
+    @Column("uuid")
+    receiverId!: string;
+
+    @Column("text")
     content!: string;
-
-    // @ManyToOne(() => User, (user) => user.sentMessages)
-    // sender!: User;
-
-    // @ManyToOne(() => User, (user) => user.receivedMessages)
-    // receiver!: User;
 
     @CreateDateColumn()
     createdAt!: Date;
+
+    @Column({ default: false })
+    isLeido!: boolean;
 }
-
-
