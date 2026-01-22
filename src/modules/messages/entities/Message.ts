@@ -10,24 +10,24 @@ import { User } from "../../users/entities/User";
 @Entity()
 export class Message {
 
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryGeneratedColumn('uuid')
     id!: string;
 
     // Usuario que envía el mensaje
-    @ManyToOne(() => User, user => user.sentMessages, { onDelete: "CASCADE" })
+    @ManyToOne(() => User, user => user.sentMessages)
     sender!: User;
 
-    @Column("uuid")
-    senderId!: string;
+    @Column('uuid')
+    senderId!: string | null;
 
-    // Usuario que recibe el mensaje
-    @ManyToOne(() => User, user => user.receivedMessages, { onDelete: "CASCADE" })
+    @ManyToOne(() => User, user => user.receivedMessages)
     receiver!: User;
 
-    @Column("uuid")
-    receiverId!: string;
+    @Column('uuid')
+    receiverId!: string | null;
 
-    @Column("text")
+
+    @Column('text')
     content!: string;
 
     @CreateDateColumn()

@@ -1,8 +1,8 @@
 import { CustomError } from '../../domain/errors/custom.error';
 import { regularExps } from '../../config/regular-exp';
-import { AppDataSource } from '../../database/data-source';
-import { User } from '../users/entities/User';
 import { BcryptAdapter } from '../../config/bcrypt.adapter';
+import { UserRepository } from "./user.repository";
+
 
 interface RegisterDto {
     email: string;
@@ -22,9 +22,6 @@ const capitalize = (str: string) => {
 };
 
 export class UserService {
-    [x: string]: any;
-
-    private userRepository = AppDataSource.getRepository(User);
 
     async register({ email, password, name }: RegisterDto) {
 
@@ -33,7 +30,7 @@ export class UserService {
 
         // Validación de email 
         if (!regularExps.email.test(email)) {
-            throw CustomError.badRequest('El email no es válido');
+            throw CustomError.badRequest(`El email ${email} no es válido`);
         }
 
         // Validar nombre
@@ -50,38 +47,39 @@ export class UserService {
         }
 
         // Validar email único
-        const exists = await this.userRepository.findOne({ where: { email } });
+        const exists = await UserRepository.findOne({ where: { email } });
         if (exists) {
-            throw CustomError.conflict('El email ya está registrado');
+            throw CustomError.conflict(`El email ${email} ya está registrado`);
         }
 
         // Hash password
         const hashedPassword = await BcryptAdapter.hash(password);
 
-        const user = this.userRepository.create({
+        const user = UserRepository.create({
             email,
             name,
             password: hashedPassword,
         });
 
-        await this.userRepository.save(user);
+        await UserRepository.save(user);
 
         const { password: _, ...userWithoutPassword } = user;
         return userWithoutPassword;
     }
 
     async getAllUsers() {
-        const users = await this.userRepository.find();
+        const users = await UserRepository.find({ withDeleted: false });
 
         return users.map(u => ({
             id: u.id,
             name: u.name,
+            email: u.email,
             active: u.isActive
         }));
     }
 
     async getUserById(id: string) {
-        const user = await this.userRepository.findOne({ where: { id } });
+        const user = await UserRepository.findOne({ where: { id } });
 
         if (!user) {
             throw CustomError.notFound('Usuario no encontrado');
@@ -103,7 +101,7 @@ export class UserService {
             throw CustomError.badRequest('El campo isActive debe ser booleano');
         }
 
-        const user = await this.userRepository.findOne({ where: { id: userId } });
+        const user = await UserRepository.findOne({ where: { id: userId } });
 
         if (!user) {
             throw CustomError.notFound('Usuario no encontrado');
@@ -111,34 +109,35 @@ export class UserService {
 
         user.isActive = isActive;
 
-        await this.userRepository.save(user);
+        await UserRepository.save(user);
 
         const { password: _, ...userWithoutPassword } = user;
         return userWithoutPassword;
     }
 
     async deleteUser(id: string) {
-        const user = await this.userRepository.findOne({ where: { id } });
-        if (!user) throw CustomError.notFound('User not found');
+        const user = await UserRepository.findOne({ where: { id } });
+        if (!user) throw CustomError.notFound('Usuario no encontrado');
 
         // 1. Desactivar usuario 
         user.isActive = false;
-        await this.userRepository.save(user);
+        await UserRepository.save(user);
 
         // 2. Soft delete real (marca deletedAt) 
-        await this.userRepository.softDelete(id);
-        return { message: 'User deleted' };
+        await UserRepository.softDelete(id);
+        // return { message: `User ${user.name} deleted` };
+        return user; // devolver el usuario eliminado
     }
 
     async updateUser(id: string, data: { name?: string; password?: string; isActive?: boolean }) {
-        const user = await this.userRepository.findOne({ where: { id } });
+        const user = await UserRepository.findOne({ where: { id } });
 
         if (!user) {
             throw CustomError.notFound('User not found');
         }
 
         if (data.name) {
-            user.name = data.name;
+            user.name = capitalize(data.name.trim());
         }
 
         if (data.password) {
@@ -150,7 +149,7 @@ export class UserService {
             user.isActive = data.isActive;
         }
 
-        await this.userRepository.save(user);
+        await UserRepository.save(user);
 
         return {
             id: user.id,

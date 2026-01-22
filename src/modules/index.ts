@@ -1,3 +1,6 @@
 
-export { User } from './users/entities/User';
-export { Message } from './messages/entities/Message';
+
+export * from "./users/entities/User";
+export * from "./messages/entities/Message";
+export * from "./notifications/entities/Notifications";
+

@@ -1,47 +1,53 @@
+import { UserRepository } from "../users/user.repository";
+import { CustomError } from "../../domain/errors/custom.error";
+import { BcryptAdapter } from "../../config/bcrypt.adapter";
+import { JwtAdapter } from "../../config/jwt.adapter";
 
-import { AppDataSource } from '../../database/data-source';
-import { User } from '../users/entities/User';
-import { CustomError } from '../../domain/errors/custom.error';
-import { BcryptAdapter } from '../../config/bcrypt.adapter';
-import { JwtAdapter } from '../../config/jwt.adapter';
-
-
-/*
-Valida email y contraseña
-Genera JWT
-Maneja errores de credenciales
- */
+//    Services → lógica de negocio
 
 export class AuthService {
 
-    private userRepository = AppDataSource.getRepository(User);
+    async register(email: string, password: string, name: string) {
 
+        // normalizar email
+        email = email.trim().toLowerCase();
 
-    async validateUser(email: string, password: string) {
-        const user = await this.userRepository.findOne({ where: { email } });
-        if (!user) throw CustomError.notFound('User not found');
+        const exists = await UserRepository.findOne({
+            where: { email },
+            withDeleted: true
+        });
 
-        // Primero comprobar si está activo o eliminado
-        if (!user.isActive) {
-            throw CustomError.unauthorized('User is inactive');
-        }
+        if (exists) throw CustomError.conflict("El email ya está registrado");
 
-        if (user.deletedAt) {
-            throw CustomError.unauthorized('User is deleted');
-        }
+        const hashed = await BcryptAdapter.hash(password);
 
-        // Luego validar contraseña
+        const user = UserRepository.create({
+            email,
+            password: hashed,
+            name
+        });
+
+        await UserRepository.save(user);
+
+        // const token = JwtAdapter.generateToken({ id: user.id, email: user.email });
+
+        const { password: _, ...userWithoutPassword } = user;
+
+        return { user: userWithoutPassword };
+    }
+
+    async login(email: string, password: string) {
+        const user = await UserRepository.findOne({ where: { email } });
+
+        if (!user) throw CustomError.unauthorized("Email inválido");
+
         const isValid = await BcryptAdapter.compare(password, user.password);
-        if (!isValid) throw CustomError.unauthorized('Invalid password');
+        if (!isValid) throw CustomError.unauthorized("Password inválidas");
 
-        return user;
+        const token = JwtAdapter.generateToken({ id: user.id, email: user.email });
+
+        const { password: _, ...userWithoutPassword } = user;
+
+        return { user: userWithoutPassword, token };
     }
-    login(user: User) {
-        const payload = { id: user.id, email: user.email };
-        const token = JwtAdapter.generateToken(payload);
-        return { token };
-    }
-
-
-
 }

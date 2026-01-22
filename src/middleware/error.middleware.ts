@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { CustomError } from '../domain/errors/custom.error';
 
+
 export const errorHandler = (
     err: any,
     req: Request,
@@ -11,11 +12,12 @@ export const errorHandler = (
 
     if (err instanceof CustomError) {
         return res.status(err.statusCode).json({
-            error: err.message, errors: err.errors ?? undefined
+            error: err.message
         });
     }
-    console.error(err);
+
+    // Errores no controlados
     return res.status(500).json({
-        error: 'Internal server error',
+        error: err.message || "Internal server error"
     });
-}
+};

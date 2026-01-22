@@ -7,7 +7,7 @@ import { User } from '../../modules/users/entities/User';
 declare global {
     namespace Express {
         interface Request {
-            user?: {
+            user: {
                 id: string;
                 email: string;
                 name?: string;
