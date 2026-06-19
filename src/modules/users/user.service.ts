@@ -16,7 +16,7 @@ Contraseña hasheada
 Devuelve usuario sin password
 */
 
-// función para cpitalizar el nombre
+// función para capitalizar el nombre
 const capitalize = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 };
@@ -125,7 +125,6 @@ export class UserService {
 
         // 2. Soft delete real (marca deletedAt) 
         await UserRepository.softDelete(id);
-        // return { message: `User ${user.name} deleted` };
         return user; // devolver el usuario eliminado
     }
 

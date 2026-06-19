@@ -41,31 +41,6 @@ export class MessageService {
         return savedMessage;
     }
 
-    /*  async getMessages(userId: string) {
-          const messages = await MessageRepository.find({
-              where: { receiverId: userId },
-              relations: ["sender", "receiver"]
-          });
-  
-          return messages.map(message => ({
-              id: message.id,
-              content: message.content,
-              createdAt: message.createdAt,
-              isLeido: message.isLeido,
-  
-              sender: {
-                  id: message.senderId,
-                  name: message.sender ? message.sender.name : "Usuario eliminado"
-              },
-  
-              receiver: {
-                  id: message.receiverId,
-                  name: message.receiver ? message.receiver.name : "Usuario eliminado"
-              }
-          }));
-  
-      }*/
-
 
     async getMessages(userId: string) {
         const messages = await MessageRepository.find({

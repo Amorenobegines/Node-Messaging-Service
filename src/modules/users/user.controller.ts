@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { UserService } from "./user.service";
-import { CustomError } from "../../domain/errors/custom.error";
 
 const userService = new UserService();
 
@@ -48,9 +47,6 @@ export class UserController {
         try {
 
             const userId = req.user!.id;
-
-            // Obtener el usuario antes de borrarlo 
-            // const user = await userService.getUserById(userId);
 
             const deletedUser = await userService.deleteUser(userId);
 
