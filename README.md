@@ -53,15 +53,6 @@ Arquitectura modular y escalable
 
 ---
 
-## Colección de Postman
-La colección completa para probar la API está disponible en:
-
-👉 `/postman/User Api.postman_collection.json`
-👉 `/postman/message.postman_collection.json`
-👉 `/postman/notification.postman_collection.json`
-
----
-
 ## Contacto
 Proyecto desarrollado por Alicia Moreno  
 Backend Developer (Node.js)
