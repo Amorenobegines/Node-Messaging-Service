@@ -7,8 +7,6 @@
 
 El entorno de desarrollo está completamente dockerizado e incluye **pgAdmin** para la gestión visual de la base de datos. 
 
-Este proyecto forma parte de las prácticas internas de Kubide. 
-
 --- 
 
 ##  Tecnologías utilizadas 
